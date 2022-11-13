@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: masterdata-streams
+  cloud:
+    stream:
+      bindings:
+        process-in-0:
+          destination: mysql.masterdata.EXCHANGE_RATE
+          group: masterdataStreamsGroup
+          consumer:
+            useNativeDecoding: true
+        process-out-0:
+          destination: masterdata.streams.exchangerates
+          producer:
+            useNativeEncoding: true
+      kafka:
+        streams:
+          binder:
+            brokers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:29092}
+            configuration:
+              commit.interval.ms: 1000
+              default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+              default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+          bindings:
+            process-in-0:
+              consumer:
+                keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                valueSerde: com.gliaci.masterdatastreams.serde.json.ExchangeRateJsonSerde
+            process-out-0:
+              producer:
+                keySerde: org.apache.kafka.common.serialization.Serdes$StringSerde
+                valueSerde: com.gliaci.masterdatastreams.serde.json.ExchangeRateDetailedJsonSerde
+
+management:
+  endpoints:
+    web:
+      exposure.include: beans, env, health, info, metrics, mappings
+  endpoint:
+    health:
+      show-details: always
